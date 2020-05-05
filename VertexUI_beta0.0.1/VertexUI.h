@@ -17,7 +17,7 @@
 #define CLOSEBTN 114513
 
 //-------------------------------------------------------------------------------------------------------------------------
-#include "framework.h"
+#include "framework.h" //VS2019中相当于stdafx.h
 #include "Resource.h"
 #include <tchar.h>
 #include <stdio.h>
