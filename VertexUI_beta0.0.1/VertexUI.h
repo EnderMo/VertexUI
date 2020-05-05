@@ -35,7 +35,7 @@ int DlgClose(HWND hwndDlg, LPARAM lParam)
     pt.y = HIWORD(lParam);
     sprintf_s(txt, "x=%d;y=%d\n", LOWORD(lParam), HIWORD(lParam));
     OutputDebugString(txt);
-    RECT  rc = { 432, 15, 70, 30 };// 这是 bmp 在主窗口的位置 ！
+    RECT  rc = { 432, 15, 70, 30 };//本代码仅用于测试，暂时没有效果·
     if (PtInRect(&rc, pt))
     {
         MessageBox(NULL, "1", "2", 0);
