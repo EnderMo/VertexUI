@@ -2,18 +2,38 @@
 * framework.h
 * 
 * 包含WINAPI运行库,同时包含VertexUI预处理宏
+
+
+(添加了linux的预编译处理)
 */
 
 #pragma once
 
-#include "targetver.h"
-// Windows 头文件
-#include <windows.h>
+
 // C 运行时头文件
 #include <stdlib.h>
 #include <malloc.h>
 #include <memory.h>
+
+#ifdef __linux__ 
+    //Linux代码放在这
+#include <X11/Xlib.h>
+#elif _WIN32
+    // Windows代码放在这
+ #include "targetver.h"
 #include <tchar.h>
+#include <windows.h>
+// Windows 头文件
+
+#else
+    //本gui库不支持其他的牛马系统
+
+#endif
+
+
+
+
+
 
 #define SimpleCode //更简洁的代码
 
