@@ -10,7 +10,7 @@ class VControl:VObject{
 
 #endif
 public:
-
+    
 private:
     virtual void OnPaint();
 

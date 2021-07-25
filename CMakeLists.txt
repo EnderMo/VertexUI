@@ -8,7 +8,7 @@ AUX_SOURCE_DIRECTORY(. SRC_LIST) #将./下的所有*.cpp加入到SRC_LIST中
 add_library(VertexUI ${SRC_LIST})
 target_precompile_headers(${PROJECT_NAME}
     PUBLIC
-    VertexUI/framework.h})
+    framework.h})
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
 include(CPack)
