@@ -13,6 +13,14 @@
 #include <stdlib.h>
 #include <malloc.h>
 #include <memory.h>
+//C++ 官方库
+#include <vector>
+#ifdef __linux__ 
+    //Linux代码放在这
+#include <X11/Xlib.h>
+#elif _WIN32
+    // Windows代码放在这
+ #include "targetver.h"
 #include <tchar.h>
 
 #define SimpleCode //更简洁的代码
