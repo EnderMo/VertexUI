@@ -1,5 +1,6 @@
 #pragma once
 #include "VertexUI.VObject.h"
+#include 
 class VControl:VObject{
 #ifdef __linux__
 
@@ -13,6 +14,12 @@ public:
     
 private:
     virtual void OnPaint();
+    
+    template<class T>
+    void EventReceiver(VUIEvent event,T* data);                 //用于向下传递消息
+
+
+
 
 
 

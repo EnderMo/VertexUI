@@ -2,9 +2,10 @@
 #include "framework.h"
 #include "VertexUI.VObject.h"
 
-class Window:VObject{
+class VUIWindow:VObject{
 #ifdef __linux__
 private:
+
     //窗口信息
     //Linux代码放在这
 #elif _WIN32
@@ -16,6 +17,8 @@ private:
 private:
     std::vector<VObject*> Children;                                                                         //实现子组件管理
 public:
+    VUIWindow(int x,int y,int width,int height);
+
     
     int EventLoop();                                                                                                    //窗体消息循环
 

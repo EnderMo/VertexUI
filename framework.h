@@ -12,10 +12,12 @@
 
 // C 运行时头文件
 #include <stdlib.h>
+#include <stdio.h>
 #include <malloc.h>
+#include <string.h>
 #include <memory.h>
 //C++ 官方库
-#include <vector>
+#include <bits/stdc++.h>
 #ifdef __linux__ 
     //Linux代码放在这
 #include <X11/Xlib.h>
