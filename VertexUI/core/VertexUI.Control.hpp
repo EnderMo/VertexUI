@@ -1,6 +1,5 @@
 #pragma once
 #include "VertexUI.VObject.h"
-#include 
 class VControl:VObject{
 #ifdef __linux__
 
@@ -13,6 +12,7 @@ class VControl:VObject{
 public:
     
 private:
+    std::vector<VControl*> Children;
     virtual void OnPaint();
     
     template<class T>

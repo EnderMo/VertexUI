@@ -1,5 +1,5 @@
 #pragma once
-#include "framework.h"
+#include "../../framework.h"
 #include "VertexUI.VObject.h"
 
 class VUIWindow:VObject{
@@ -15,6 +15,7 @@ private:
 #endif
     //通用代码放这
 private:
+    WindowConfig config;
     std::vector<VObject*> Children;                                                                         //实现子组件管理
 public:
     VUIWindow(int x,int y,int width,int height);
