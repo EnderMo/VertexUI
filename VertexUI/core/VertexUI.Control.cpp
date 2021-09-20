@@ -3,6 +3,7 @@ template<class T>
 void VControl::EventReceiver(VUIEvent event,T* data){
     for (auto i :Children){
         *i->EventReceiver(event,data);
+        //下级消息传递
     }
 
 }

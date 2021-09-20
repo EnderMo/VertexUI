@@ -5,7 +5,6 @@ class VControl:VObject{
 
 #elif _WIN32
 
-#else
 
 
 #endif

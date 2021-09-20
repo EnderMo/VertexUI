@@ -7,9 +7,6 @@ struct WindowConfig{
     Display *display;
     XEvent xevent;
     int screen_index;
-
-
-
     #elif _WIN32
 
     #endif
