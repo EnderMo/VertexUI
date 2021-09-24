@@ -12,15 +12,17 @@ VUIWindow::VUIWindow(int x, int y, int width, int height)
         exit(-1);
     }
     this->config.screen_index = DefaultScreen(this->config.display);
-    this->config.window = XCreateSimpleWindow(config.display,
-                                              RootWindow(config.display, config.screen_index),
-                                              x,
-                                              y,
-                                              width,
-                                              height,
-                                              0,
-                                              BlackPixel(config.display, config.screen_index),
-                                              WhitePixel(config.display, config.screen_index));
+    this->config.window = XCreateSimpleWindow(
+                                            config.display,
+                                            RootWindow(config.display, config.screen_index),
+                                            x,
+                                            y,
+                                            width,
+                                            height,
+                                            0,
+                                            BlackPixel(config.display, config.screen_index),
+                                            WhitePixel(config.display, config.screen_index)
+                                            );
     
 
 #elif _WIN32
