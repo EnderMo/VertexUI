@@ -6,13 +6,14 @@
 * 
 */
 #include "framework.h"
-
+#include "VertexUI.Panel.h"
 typedef int RUNFUN;
 
 namespace VertexUI 
 {
     namespace Click
     {
+        using namespace::VertexUI::Panel;
         int ClickArea(HWND hWnd, int x, int y, int sizex, int sizey, LPARAM lParam, RUNFUN function())
         {
             POINT pt;
@@ -82,8 +83,28 @@ namespace VertexUI
             return -1;
         }
 
-        int CreateClickEvent(HWND hWnd, int x, int y, int sizex, int sizey, LPARAM lParam, RUNFUN function(), int msg)
+        int _CreateClickEvent(HWND hWnd, int x, int y, int sizex, int sizey, LPARAM lParam, RUNFUN function(), int msg)
         {
+            ClickAreaEx(hWnd, x, y, sizex, sizey, lParam, function, msg);
+            return 0;
+        }
+
+        int CreateClickEvent(HWND hWnd, int x, int y, int sizex, int sizey, LPARAM lParam, RUNFUN function(), wchar_t* Panelid)
+        {
+            int msg = 0;
+            if (Panelid == PanelID)
+            {
+                msg = 1;
+            }
+            if (Panelid == PrevPanelID)
+            {
+                msg = 1;
+            }
+
+            else
+            {
+                msg = 0;
+            }
             ClickAreaEx(hWnd, x, y, sizex, sizey, lParam, function, msg);
             return 0;
         }

@@ -10,13 +10,13 @@
 
 #include "VertexUI.Colors.h"
 
-//#define VERTEXUI_DEVMODE
+#define VERTEXUI_DEVMODE
 
 namespace VertexUI
 {
     typedef void (DRAWPANEL)(HWND, HDC);
-    int PanelID = 0;
-    int PrevPanelID = 0;
+    wchar_t* PanelID = L"Init";
+    wchar_t* PrevPanelID = L"Init";
     namespace Panel
     {
         //CreatePanel only passed in parameters below:(HWND,HDC).
@@ -84,7 +84,7 @@ namespace VertexUI
         }
 
         //Create a Drawing Panel.
-        void CreatePanel(HWND h, HDC hdc, DRAWPANEL DrawFun)
+        void _CreatePanel(HWND h, HDC hdc, DRAWPANEL DrawFun)
         {
             HDC         hMemDC;
             HBITMAP     hBmpMem;
@@ -111,7 +111,7 @@ namespace VertexUI
         }
 
         //
-        void CreatePanelByID(HWND h, HDC hdc, DRAWPANEL DrawFun,int ID)
+        void CreatePanel(HWND h, HDC hdc, DRAWPANEL DrawFun,wchar_t* ID)
         {
             HDC         hMemDC;
             HBITMAP     hBmpMem;
@@ -125,10 +125,7 @@ namespace VertexUI
 
             hPreBmp = (HBITMAP)SelectObject(hMemDC, hBmpMem);
             //On hMemDC.
-            if (PanelID == ID)
-            {
-                DrawFun(h, hMemDC);
-            }
+            DrawFun(h, hMemDC);
 
             BitBlt(hdc, 0, 0, rc.right - rc.left, rc.bottom - rc.top, hMemDC, 0, 0, SRCCOPY);
 
@@ -142,12 +139,12 @@ namespace VertexUI
         }
 
         //
-        void SwitchPanel(DRAWPANEL p,int ID)
+        void SwitchPanel(DRAWPANEL p,wchar_t* ID)
         {
             PanelID = ID;
         }
 
-        void SetPanelID(int id)
+        void SetPanelID(wchar_t *id)
         {
             PrevPanelID = PanelID;
             PanelID = id;
@@ -173,7 +170,68 @@ void XSleep(UINT Delay_ms)
         Sleep(0);
     }
 }
+struct PanelHandleFun
+{
+    HDC hdc;
+    HDC hmdc;
+    RECT rc;
+    HBITMAP hpbp;
+    HBITMAP hmbp;
+};
 int anistat = 0;
+DWORD WINAPI VUIPAnimationThread(LPVOID pf)
+{
+    PanelHandleFun* p = (PanelHandleFun *)pf;
+    HDC hdc = p->hdc;
+    HDC hMemDC = p->hmdc;
+    RECT rc = p->rc;
+    HBITMAP hPreBmp = p->hpbp;
+    HBITMAP hBmpMem = p->hmbp;
+    BitBlt(hdc, 300, 0, rc.right - rc.left, rc.bottom - rc.top, hMemDC, 0, 0, SRCCOPY);
+    XSleep(10);
+    BitBlt(hdc, 295, 0, rc.right - rc.left, rc.bottom - rc.top, hMemDC, 0, 0, SRCCOPY);
+    XSleep(10);
+    BitBlt(hdc, 282, 0, rc.right - rc.left, rc.bottom - rc.top, hMemDC, 0, 0, SRCCOPY);
+    XSleep(10);
+    BitBlt(hdc, 262, 0, rc.right - rc.left, rc.bottom - rc.top, hMemDC, 0, 0, SRCCOPY);
+    XSleep(10);
+    BitBlt(hdc, 243, 0, rc.right - rc.left, rc.bottom - rc.top, hMemDC, 0, 0, SRCCOPY);
+    XSleep(10);
+    BitBlt(hdc, 214, 0, rc.right - rc.left, rc.bottom - rc.top, hMemDC, 0, 0, SRCCOPY);
+    XSleep(10);
+    BitBlt(hdc, 171, 0, rc.right - rc.left, rc.bottom - rc.top, hMemDC, 0, 0, SRCCOPY);
+    XSleep(10);
+    BitBlt(hdc, 116, 0, rc.right - rc.left, rc.bottom - rc.top, hMemDC, 0, 0, SRCCOPY);
+    XSleep(10);
+    BitBlt(hdc, 71, 0, rc.right - rc.left, rc.bottom - rc.top, hMemDC, 0, 0, SRCCOPY);
+    XSleep(10);
+    BitBlt(hdc, 41, 0, rc.right - rc.left, rc.bottom - rc.top, hMemDC, 0, 0, SRCCOPY);
+    XSleep(10);
+    BitBlt(hdc, 29, 0, rc.right - rc.left, rc.bottom - rc.top, hMemDC, 0, 0, SRCCOPY);
+    XSleep(10);
+    BitBlt(hdc, 17, 0, rc.right - rc.left, rc.bottom - rc.top, hMemDC, 0, 0, SRCCOPY);
+    XSleep(10);
+    BitBlt(hdc, 11, 0, rc.right - rc.left, rc.bottom - rc.top, hMemDC, 0, 0, SRCCOPY);
+    XSleep(10);
+    BitBlt(hdc, 8, 0, rc.right - rc.left, rc.bottom - rc.top, hMemDC, 0, 0, SRCCOPY);
+    XSleep(10);
+    BitBlt(hdc, 5, 0, rc.right - rc.left, rc.bottom - rc.top, hMemDC, 0, 0, SRCCOPY);
+    XSleep(10);
+    BitBlt(hdc, 3, 0, rc.right - rc.left, rc.bottom - rc.top, hMemDC, 0, 0, SRCCOPY);
+    XSleep(10);
+    BitBlt(hdc, 2, 0, rc.right - rc.left, rc.bottom - rc.top, hMemDC, 0, 0, SRCCOPY);
+    XSleep(10);
+    BitBlt(hdc, 1, 0, rc.right - rc.left, rc.bottom - rc.top, hMemDC, 0, 0, SRCCOPY);
+    XSleep(10);
+    BitBlt(hdc, 0, 0, rc.right - rc.left, rc.bottom - rc.top, hMemDC, 0, 0, SRCCOPY);
+    SelectObject(hMemDC, hPreBmp);
+
+
+    DeleteObject(hBmpMem);
+
+    DeleteDC(hMemDC);
+    return 0;
+}
 int CreatePanelAnimation(HWND h, HDC hdc, DRAWPANEL DrawFun)
 {
     HDC         hMemDC;
@@ -197,49 +255,16 @@ int CreatePanelAnimation(HWND h, HDC hdc, DRAWPANEL DrawFun)
     }
     if (anistat == 0)
     {
-        BitBlt(hdc, 300, 0, rc.right - rc.left, rc.bottom - rc.top, hMemDC, 0, 0, SRCCOPY);
-        XSleep(10);
-        BitBlt(hdc, 295, 0, rc.right - rc.left, rc.bottom - rc.top, hMemDC, 0, 0, SRCCOPY);
-        XSleep(10);
-        BitBlt(hdc, 282, 0, rc.right - rc.left, rc.bottom - rc.top, hMemDC, 0, 0, SRCCOPY);
-        XSleep(10);
-        BitBlt(hdc, 262, 0,rc.right - rc.left, rc.bottom - rc.top, hMemDC, 0, 0, SRCCOPY);
-        XSleep(10);
-        BitBlt(hdc, 243, 0, rc.right - rc.left, rc.bottom - rc.top, hMemDC, 0, 0, SRCCOPY);
-        XSleep(10);
-        BitBlt(hdc, 214, 0, rc.right - rc.left, rc.bottom - rc.top, hMemDC, 0, 0, SRCCOPY);
-        XSleep(10);
-        BitBlt(hdc, 171, 0, rc.right - rc.left, rc.bottom - rc.top, hMemDC, 0, 0, SRCCOPY);
-        XSleep(10);
-        BitBlt(hdc, 116, 0, rc.right - rc.left, rc.bottom - rc.top, hMemDC, 0, 0, SRCCOPY);
-        XSleep(10);
-        BitBlt(hdc, 71, 0, rc.right - rc.left, rc.bottom - rc.top, hMemDC, 0, 0, SRCCOPY);
-        XSleep(10);
-        BitBlt(hdc, 41, 0, rc.right - rc.left, rc.bottom - rc.top, hMemDC, 0, 0, SRCCOPY);
-        XSleep(10);
-        BitBlt(hdc, 29, 0, rc.right - rc.left, rc.bottom - rc.top, hMemDC, 0, 0, SRCCOPY);
-        XSleep(10);
-        BitBlt(hdc, 17, 0, rc.right - rc.left, rc.bottom - rc.top, hMemDC, 0, 0, SRCCOPY);
-        XSleep(10);
-        BitBlt(hdc, 11, 0, rc.right - rc.left, rc.bottom - rc.top, hMemDC, 0, 0, SRCCOPY);
-        XSleep(10);
-        BitBlt(hdc, 8, 0, rc.right - rc.left, rc.bottom - rc.top, hMemDC, 0, 0, SRCCOPY);
-        XSleep(10);
-        BitBlt(hdc, 5, 0, rc.right - rc.left, rc.bottom - rc.top, hMemDC, 0, 0, SRCCOPY);
-        XSleep(10);
-        BitBlt(hdc, 3, 0, rc.right - rc.left, rc.bottom - rc.top, hMemDC, 0, 0, SRCCOPY);
-        XSleep(10);
-        BitBlt(hdc, 2, 0, rc.right - rc.left, rc.bottom - rc.top, hMemDC, 0, 0, SRCCOPY);
-        XSleep(10);
-        BitBlt(hdc, 1, 0, rc.right - rc.left, rc.bottom - rc.top, hMemDC, 0, 0, SRCCOPY);
-        XSleep(10);
-        BitBlt(hdc, 0, 0, rc.right - rc.left, rc.bottom - rc.top, hMemDC, 0, 0, SRCCOPY);
-        SelectObject(hMemDC, hPreBmp);
+        PanelHandleFun p;
+        p.hdc = hdc;
+        p.hmdc = hMemDC;
+        p.rc = rc;
+        p.hpbp = hPreBmp;
+        p.hmbp = hBmpMem;
+        HANDLE thread = CreateThread(NULL, NULL, VUIPAnimationThread, &p, 0, 0);
+        WaitForSingleObject(thread, INFINITE); //要播完再关呢
+        CloseHandle(thread);
 
-
-        DeleteObject(hBmpMem);
-
-        DeleteDC(hMemDC);
         anistat = 1;
         return -1;
     }
@@ -260,7 +285,7 @@ void CreatePanelByFlag(HWND h, HDC hdc, DRAWPANEL DrawFun)
     //On hMemDC.
     if (PanelID == PrevPanelID)
     {
-        CreatePanel(h, hdc, DrawFun);
+        _CreatePanel(h, hdc, DrawFun);
         anistat = 0;
     }
     if (PanelID != PrevPanelID)
