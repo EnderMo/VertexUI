@@ -89,7 +89,7 @@ namespace VertexUI
             return 0;
         }
 
-        int CreateClickEvent(HWND hWnd, int x, int y, int sizex, int sizey, LPARAM lParam, RUNFUN function(), wchar_t* Panelid)
+        int CreateClickEvent(HWND hWnd, int x, int y, int sizex, int sizey, LPARAM lParam, RUNFUN function(),  const wchar_t* Panelid)
         {
             int msg = 0;
             if (Panelid == PanelID)

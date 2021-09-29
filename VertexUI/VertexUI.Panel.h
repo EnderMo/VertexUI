@@ -9,14 +9,15 @@
 #include "framework.h"
 
 #include "VertexUI.Colors.h"
+#include <assert.h>
 
 #define VERTEXUI_DEVMODE
 
 namespace VertexUI
 {
     typedef void (DRAWPANEL)(HWND, HDC);
-    wchar_t* PanelID = L"Init";
-    wchar_t* PrevPanelID = L"Init";
+    const wchar_t* PanelID = L"Init";
+    const wchar_t* PrevPanelID = L"Init";
     namespace Panel
     {
         //CreatePanel only passed in parameters below:(HWND,HDC).
@@ -55,7 +56,7 @@ namespace VertexUI
         }
 
         //Text
-        void TextPreDraw(HDC hdc, int x,int y,int sizex,int sizey, LPTSTR txt, COLORREF cl)
+        void TextPreDraw(HDC hdc, int x,int y,int sizex,int sizey, const wchar_t* txt, COLORREF cl)
         {
             RECT rc;
             RectTypeConvert(rc,x, y, sizex, sizey);
@@ -77,7 +78,7 @@ namespace VertexUI
         }
         
         //Button
-        void CreateSimpleButton(HWND h,HDC hdc,int x, int y, int sizex, int sizey,LPTSTR s)
+        void CreateSimpleButton(HWND h,HDC hdc,int x, int y, int sizex, int sizey,const wchar_t* s)
         {
             CreateRect(h, hdc, x, y, sizex, sizey, VERTEXUI_GREENSEA);
             TextPreDraw(hdc, x, y, sizex, sizey, s, VERTEXUI_WHITE);
@@ -111,7 +112,7 @@ namespace VertexUI
         }
 
         //
-        void CreatePanel(HWND h, HDC hdc, DRAWPANEL DrawFun,wchar_t* ID)
+        void CreatePanel(HWND h, HDC hdc, DRAWPANEL DrawFun,const wchar_t* ID)
         {
             HDC         hMemDC;
             HBITMAP     hBmpMem;
@@ -139,12 +140,12 @@ namespace VertexUI
         }
 
         //
-        void SwitchPanel(DRAWPANEL p,wchar_t* ID)
+        void SwitchPanel(DRAWPANEL p,const wchar_t* ID)
         {
             PanelID = ID;
         }
 
-        void SetPanelID(wchar_t *id)
+        void SetPanelID(const wchar_t *id)
         {
             PrevPanelID = PanelID;
             PanelID = id;
@@ -295,4 +296,158 @@ void CreatePanelByFlag(HWND h, HDC hdc, DRAWPANEL DrawFun)
         anistat = 0;
     }
 }
+void TESTDrawLine(HDC pDC, int X0, int Y0, int X1, int Y1, COLORREF clrLine)
+{
+    HDC mDC = pDC;
+    if (Y0 > Y1)
+    {
+        int Temp = Y0; Y0 = Y1; Y1 = Temp;
+        Temp = X0; X0 = X1; X1 = Temp;
+    }
+
+    SetPixel(pDC,X0, Y0, clrLine);
+
+    int XDir, DeltaX = X1 - X0;
+    if (DeltaX >= 0)
+    {
+        XDir = 1;
+    }
+    else
+    {
+        XDir = -1;
+        DeltaX = 0 - DeltaX; 
+    }
+
+    int DeltaY = Y1 - Y0;
+    if (DeltaY == 0)
+    {
+        /* Horizontal line */
+        while (DeltaX-- != 0)
+        {
+            X0 += XDir;
+            SetPixel(pDC,X0, Y0, clrLine);
+        }
+        return;
+    }
+    if (DeltaX == 0)
+    {
+        /* Vertical line */
+        do
+        {
+            Y0++;
+            SetPixel(pDC,X0, Y0, clrLine);
+        } while (--DeltaY != 0);
+        return;
+    }
+
+    if (DeltaX == DeltaY)
+    {
+        /* Diagonal line */
+        do
+        {
+            X0 += XDir;
+            Y0++;
+            SetPixel(pDC,X0, Y0, clrLine);
+        } while (--DeltaY != 0);
+        return;
+    }
+
+    unsigned short ErrorAdj;
+    unsigned short ErrorAccTemp, Weighting;
+
+
+    unsigned short ErrorAcc = 0; 
+
+    BYTE rl = GetRValue(clrLine);
+    BYTE gl = GetGValue(clrLine);
+    BYTE bl = GetBValue(clrLine);
+    double grayl = rl * 0.299 + gl * 0.587 + bl * 0.114;
+
+    if (DeltaY > DeltaX)
+    {
+
+        ErrorAdj = ((unsigned long)DeltaX << 16) / (unsigned long)DeltaY;
+        while (--DeltaY) {
+            ErrorAccTemp = ErrorAcc;   
+            ErrorAcc += ErrorAdj;      
+            if (ErrorAcc <= ErrorAccTemp) {
+                
+                X0 += XDir;
+            }
+            Y0++; 
+
+            Weighting = ErrorAcc >> 8;
+            assert(Weighting < 256);
+            assert((Weighting ^ 255) < 256);
+
+            COLORREF clrBackGround = ::GetPixel(mDC, X0, Y0);
+            BYTE rb = GetRValue(clrBackGround);
+            BYTE gb = GetGValue(clrBackGround);
+            BYTE bb = GetBValue(clrBackGround);
+            double grayb = rb * 0.299 + gb * 0.587 + bb * 0.114;
+
+            BYTE rr = (rb > rl ? ((BYTE)(((double)(grayl < grayb ? Weighting : (Weighting ^ 255))) / 255.0 * (rb - rl) + rl)) : ((BYTE)(((double)(grayl < grayb ? Weighting : (Weighting ^ 255))) / 255.0 * (rl - rb) + rb)));
+            BYTE gr = (gb > gl ? ((BYTE)(((double)(grayl < grayb ? Weighting : (Weighting ^ 255))) / 255.0 * (gb - gl) + gl)) : ((BYTE)(((double)(grayl < grayb ? Weighting : (Weighting ^ 255))) / 255.0 * (gl - gb) + gb)));
+            BYTE br = (bb > bl ? ((BYTE)(((double)(grayl < grayb ? Weighting : (Weighting ^ 255))) / 255.0 * (bb - bl) + bl)) : ((BYTE)(((double)(grayl < grayb ? Weighting : (Weighting ^ 255))) / 255.0 * (bl - bb) + bb)));
+            SetPixel(pDC,X0, Y0, RGB(rr, gr, br));
+
+            clrBackGround = ::GetPixel(mDC, X0 + XDir, Y0);
+            rb = GetRValue(clrBackGround);
+            gb = GetGValue(clrBackGround);
+            bb = GetBValue(clrBackGround);
+            grayb = rb * 0.299 + gb * 0.587 + bb * 0.114;
+
+            rr = (rb > rl ? ((BYTE)(((double)(grayl < grayb ? (Weighting ^ 255) : Weighting)) / 255.0 * (rb - rl) + rl)) : ((BYTE)(((double)(grayl < grayb ? (Weighting ^ 255) : Weighting)) / 255.0 * (rl - rb) + rb)));
+            gr = (gb > gl ? ((BYTE)(((double)(grayl < grayb ? (Weighting ^ 255) : Weighting)) / 255.0 * (gb - gl) + gl)) : ((BYTE)(((double)(grayl < grayb ? (Weighting ^ 255) : Weighting)) / 255.0 * (gl - gb) + gb)));
+            br = (bb > bl ? ((BYTE)(((double)(grayl < grayb ? (Weighting ^ 255) : Weighting)) / 255.0 * (bb - bl) + bl)) : ((BYTE)(((double)(grayl < grayb ? (Weighting ^ 255) : Weighting)) / 255.0 * (bl - bb) + bb)));
+            SetPixel(pDC,X0 + XDir, Y0, RGB(rr, gr, br));
+        }
+
+        SetPixel(pDC,X1, Y1, clrLine);
+        return;
+    }
+
+    ErrorAdj = ((unsigned long)DeltaY << 16) / (unsigned long)DeltaX;
+
+    while (--DeltaX) {
+        ErrorAccTemp = ErrorAcc;   
+        ErrorAcc += ErrorAdj;     
+        if (ErrorAcc <= ErrorAccTemp) {
+
+            Y0++;
+        }
+        X0 += XDir; 
+
+        Weighting = ErrorAcc >> 8;
+        assert(Weighting < 256);
+        assert((Weighting ^ 255) < 256);
+
+        COLORREF clrBackGround = ::GetPixel(mDC, X0, Y0);
+        BYTE rb = GetRValue(clrBackGround);
+        BYTE gb = GetGValue(clrBackGround);
+        BYTE bb = GetBValue(clrBackGround);
+        double grayb = rb * 0.299 + gb * 0.587 + bb * 0.114;
+
+        BYTE rr = (rb > rl ? ((BYTE)(((double)(grayl < grayb ? Weighting : (Weighting ^ 255))) / 255.0 * (rb - rl) + rl)) : ((BYTE)(((double)(grayl < grayb ? Weighting : (Weighting ^ 255))) / 255.0 * (rl - rb) + rb)));
+        BYTE gr = (gb > gl ? ((BYTE)(((double)(grayl < grayb ? Weighting : (Weighting ^ 255))) / 255.0 * (gb - gl) + gl)) : ((BYTE)(((double)(grayl < grayb ? Weighting : (Weighting ^ 255))) / 255.0 * (gl - gb) + gb)));
+        BYTE br = (bb > bl ? ((BYTE)(((double)(grayl < grayb ? Weighting : (Weighting ^ 255))) / 255.0 * (bb - bl) + bl)) : ((BYTE)(((double)(grayl < grayb ? Weighting : (Weighting ^ 255))) / 255.0 * (bl - bb) + bb)));
+
+        SetPixel(pDC,X0, Y0, RGB(rr, gr, br));
+
+        clrBackGround = ::GetPixel(mDC, X0, Y0 + 1);
+        rb = GetRValue(clrBackGround);
+        gb = GetGValue(clrBackGround);
+        bb = GetBValue(clrBackGround);
+        grayb = rb * 0.299 + gb * 0.587 + bb * 0.114;
+
+        rr = (rb > rl ? ((BYTE)(((double)(grayl < grayb ? (Weighting ^ 255) : Weighting)) / 255.0 * (rb - rl) + rl)) : ((BYTE)(((double)(grayl < grayb ? (Weighting ^ 255) : Weighting)) / 255.0 * (rl - rb) + rb)));
+        gr = (gb > gl ? ((BYTE)(((double)(grayl < grayb ? (Weighting ^ 255) : Weighting)) / 255.0 * (gb - gl) + gl)) : ((BYTE)(((double)(grayl < grayb ? (Weighting ^ 255) : Weighting)) / 255.0 * (gl - gb) + gb)));
+        br = (bb > bl ? ((BYTE)(((double)(grayl < grayb ? (Weighting ^ 255) : Weighting)) / 255.0 * (bb - bl) + bl)) : ((BYTE)(((double)(grayl < grayb ? (Weighting ^ 255) : Weighting)) / 255.0 * (bl - bb) + bb)));
+
+        SetPixel(pDC,X0, Y0 + 1, RGB(rr, gr, br));
+    }
+
+    SetPixel(pDC,X1, Y1, clrLine);
+}
+
 #endif
