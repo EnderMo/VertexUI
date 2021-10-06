@@ -110,7 +110,25 @@ namespace VertexUI
             }
             return -1;
         }
-
+        int GetAreaPtInfo(HWND hWnd, int x, int y, int sizex, int sizey, RECT& rc2, LPARAM lParam)
+        {
+            POINT pt;
+            pt.x = LOWORD(lParam);
+            pt.y = HIWORD(lParam);
+            RECT rect;
+            GetClientRect(hWnd, &rect);
+            RECT  rc = { x,y,x + sizex,y + sizey };
+            rc2 = { x,y,x + sizex,y + sizey };
+            if (PtInRect(&rc, pt))
+            {
+                return 1;
+            }
+            else
+            {
+                return 0;
+            }
+            return -1;
+        }
         int _CreateClickEvent(HWND hWnd, int x, int y, int sizex, int sizey, LPARAM lParam, RUNFUN function(), int msg)
         {
             ClickAreaEx(hWnd, x, y, sizex, sizey, lParam, function, msg);
