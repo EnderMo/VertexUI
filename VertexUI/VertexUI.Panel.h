@@ -7,7 +7,6 @@
 * 
 */
 #include "framework.h"
-#include "../LightFrame.DevLab.h"
 #include "VertexUI.Colors.h"
 #include <assert.h>
 
@@ -394,15 +393,18 @@ int CreatePanelAnimation(HWND h, HDC hdc, DRAWPANEL DrawFun)
     }
     if (anistat == 0)
     {
-        PanelHandleFun p;
+        PanelHandleFun p{};
         p.hdc = hdc;
         p.hmdc = hMemDC;
         p.rc = rc;
         p.hpbp = hPreBmp;
         p.hmbp = hBmpMem;
         HANDLE thread = CreateThread(NULL, NULL, VUIPAnimationThread, &p, 0, 0);
-        WaitForSingleObject(thread, INFINITE); //要播完再关呢
-        CloseHandle(thread);
+        if (thread)
+        {
+          WaitForSingleObject(thread, INFINITE); //要播完再关呢
+          CloseHandle(thread);
+        }
 
         anistat = 1;
         return -1;
