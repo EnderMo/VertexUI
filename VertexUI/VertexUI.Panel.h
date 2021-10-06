@@ -7,7 +7,7 @@
 * 
 */
 #include "framework.h"
-
+#include "../LightFrame.DevLab.h"
 #include "VertexUI.Colors.h"
 #include <assert.h>
 
@@ -16,8 +16,18 @@
 namespace VertexUI
 {
     typedef void (DRAWPANEL)(HWND, HDC);
+    typedef void (SDRAWPANEL)( HDC);
+    typedef struct VERTEXUICTL {
+        int x;
+        int y;
+        int sizex;
+        int sizey;
+        const wchar_t* Text;
+    }TagVUICTL;
     const wchar_t* PanelID = L"Init";
     const wchar_t* PrevPanelID = L"Init";
+    const wchar_t* ButtonText = L"Button";
+    int g_hoverstate = 0;
     namespace Panel
     {
         //CreatePanel only passed in parameters below:(HWND,HDC).
@@ -76,12 +86,138 @@ namespace VertexUI
             DeleteObject(hFont);
             SelectObject(hdc, old);
         }
-        
+
+        //Flags: 0.ToLeft 1.Center 
+        void TextPreDrawEx(HDC hdc, int x, int y, int sizex, int sizey, const wchar_t* txt,int sz,int flag, COLORREF cl)
+        {
+            RECT rc;
+            RectTypeConvert(rc, x, y, sizex, sizey);
+            LOGFONT lf;
+            HFONT hFont = 0;
+            SetTextColor(hdc, cl);
+            SetBkMode(hdc, TRANSPARENT);
+            if (hFont == 0)
+            {
+                memset(&lf, 0, sizeof(LOGFONT));
+                lf.lfHeight = -sz;
+                wcscpy_s(lf.lfFaceName, L"Segoe UI");
+                hFont = CreateFontIndirect(&lf);  // create the font
+            }
+            HFONT old = (HFONT)SelectObject(hdc, hFont);
+            if (flag == 0)
+            {
+                DrawText(hdc, txt, wcslen(txt), &rc, DT_SINGLELINE | DT_VCENTER);
+            }
+            if (flag == 1)
+            {
+                DrawText(hdc, txt, wcslen(txt), &rc, DT_SINGLELINE |DT_CENTER| DT_VCENTER);
+            }
+            if (flag == 2)
+            {
+                DrawText(hdc, txt, wcslen(txt), &rc, DT_SINGLELINE );
+            }
+            DeleteObject(hFont);
+            SelectObject(hdc, old);
+        }
+        void _TextPreDrawEx(HDC hdc, int x, int y, int sizex, int sizey, const wchar_t* txt, int sz, const wchar_t* Font,int flag, COLORREF cl)
+        {
+            RECT rc;
+            RectTypeConvert(rc, x, y, sizex, sizey);
+            LOGFONT lf;
+            HFONT hFont = 0;
+            SetTextColor(hdc, cl);
+            SetBkMode(hdc, TRANSPARENT);
+            if (hFont == 0)
+            {
+                memset(&lf, 0, sizeof(LOGFONT));
+                lf.lfHeight = -sz;
+                lf.lfQuality = ANTIALIASED_QUALITY;
+                wcscpy_s(lf.lfFaceName, Font);
+                hFont = CreateFontIndirect(&lf);  // create the font
+            }
+            HFONT old = (HFONT)SelectObject(hdc, hFont);
+            if (flag == 0)
+            {
+                DrawText(hdc, txt, wcslen(txt), &rc, DT_SINGLELINE | DT_VCENTER);
+            }
+            if (flag == 1)
+            {
+                DrawText(hdc, txt, wcslen(txt), &rc, DT_SINGLELINE | DT_CENTER | DT_VCENTER);
+            }
+            if (flag == 2)
+            {
+                DrawText(hdc, txt, wcslen(txt), &rc, DT_SINGLELINE);
+            }
+            if (flag == 3)
+            {
+                DrawText(hdc, txt, wcslen(txt), &rc, DT_CENTER | DT_VCENTER);
+            }
+            if (flag == 4)
+            {
+                DrawText(hdc, txt, wcslen(txt), &rc, DT_VCENTER);
+            }
+            DeleteObject(hFont);
+            SelectObject(hdc, old);
+        }
+        //Only straight Line
+        void PanelDrawSTLine(HDC pDC, int X0, int Y0, int X1, int Y1, COLORREF clrLine)
+        {
+            if (Y0 > Y1){int Temp = Y0; Y0 = Y1; Y1 = Temp;Temp = X0; X0 = X1; X1 = Temp;}SetPixel(pDC, X0, Y0, clrLine);
+            int XDir, DeltaX = X1 - X0;if (DeltaX >= 0){XDir = 1;}else{XDir = -1;DeltaX = 0 - DeltaX;}int DeltaY = Y1 - Y0;
+            if (DeltaY == 0){while (DeltaX-- != 0){X0 += XDir;SetPixel(pDC, X0, Y0, clrLine);}return;}
+            if (DeltaX == 0){do{Y0++;SetPixel(pDC, X0, Y0, clrLine);} while (--DeltaY != 0);return;}
+            if (DeltaX == DeltaY){do{X0 += XDir;Y0++;SetPixel(pDC, X0, Y0, clrLine);} while (--DeltaY != 0);return;}SetPixel(pDC, X1, Y1, clrLine);
+        }
+
+        //Frame
+
+        void PanelDrawOutFrame(HWND h,HDC hdc,COLORREF cl)
+        {
+            RECT rc;
+            GetClientRect(h, &rc);
+            PanelDrawSTLine(hdc, 0, 0, rc.right, 0,cl);
+            PanelDrawSTLine(hdc, 0, 0, 0, rc.bottom, cl);
+            PanelDrawSTLine(hdc, 0, rc.bottom - 1, rc.right - rc.left, rc.bottom - 1, cl);
+            PanelDrawSTLine(hdc, rc.right - 1, 0, rc.right - 1 , rc.bottom - 1, cl);
+        }
+        void PanelDrawCloseBtn(HWND h, HDC hdc, int x,int y,int x1,int y1,int inframepos,COLORREF cl)
+        {
+            RECT rc;
+            RectTypeConvert(rc, x, y, x1, y1);
+            HPEN hpen;
+            hpen = CreatePen(PS_SOLID, 1, cl);
+            HPEN prhp = (HPEN)SelectObject(hdc, hpen);
+            SelectObject(hdc,hpen);
+            MoveToEx(hdc, rc.left + inframepos +1, rc.top + inframepos + 1, NULL);
+            LineTo(hdc, rc.right - inframepos, rc.bottom - inframepos);
+
+            MoveToEx(hdc, rc.left + inframepos + 1, rc.bottom - inframepos - 1, NULL);
+            LineTo(hdc, rc.right - inframepos, rc.top + inframepos);
+            DeleteObject(hpen);
+            SelectObject(hdc,prhp);
+        }
+
         //Button
         void CreateSimpleButton(HWND h,HDC hdc,int x, int y, int sizex, int sizey,const wchar_t* s)
         {
             CreateRect(h, hdc, x, y, sizex, sizey, VERTEXUI_GREENSEA);
             TextPreDraw(hdc, x, y, sizex, sizey, s, VERTEXUI_WHITE);
+        }
+
+        //Custom Color Button
+        void CreateSimpleButtonEx(HWND h, HDC hdc, int x, int y, int sizex, int sizey,COLORREF cl,const wchar_t* s)
+        {
+            int tsz = 0;
+                CreateRect(h, hdc, x, y, sizex, sizey, cl);
+                if(sizey > 23)
+                {
+                    tsz = 18;
+                }
+                else
+                {
+                    tsz = 16;
+                }
+                TextPreDrawEx(hdc, x, y, sizex, sizey, s, tsz,1,VERTEXUI_WHITE);
         }
 
         //Create a Drawing Panel.
@@ -156,6 +292,7 @@ namespace VertexUI
 #ifdef VERTEXUI_DEVMODE
 using namespace::VertexUI;
 using namespace::VertexUI::Panel;
+
 void XSleep(UINT Delay_ms)
 {
     DWORD dwTick = GetTickCount64() + Delay_ms;
@@ -225,6 +362,7 @@ DWORD WINAPI VUIPAnimationThread(LPVOID pf)
     BitBlt(hdc, 1, 0, rc.right - rc.left, rc.bottom - rc.top, hMemDC, 0, 0, SRCCOPY);
     XSleep(10);
     BitBlt(hdc, 0, 0, rc.right - rc.left, rc.bottom - rc.top, hMemDC, 0, 0, SRCCOPY);
+
     SelectObject(hMemDC, hPreBmp);
 
 
@@ -449,5 +587,61 @@ void TESTDrawLine(HDC pDC, int X0, int Y0, int X1, int Y1, COLORREF clrLine)
 
     SetPixel(pDC,X1, Y1, clrLine);
 }
+void CreateButton(HWND hWnd,HDC hdc,int x,int y,int sizex,int sizey,int cid, const wchar_t* CTLTXT)
+{
+    //VERTEXUICTL btn;
+    //btn.Text = L"114514";
+    CreateSimpleButton(hWnd, hdc, x, y, sizex, sizey, CTLTXT);
+}
+
+
+void DrawGradient(HDC pDC, RECT rRect, COLORREF crFrom, COLORREF crTo)
+{
+
+    int iHeight = rRect.bottom - rRect.top;
+
+    int iWidth = (rRect.right - rRect.left) ;
+
+    //
+
+    int iR = GetRValue(crFrom);
+
+    int iG = GetGValue(crFrom);
+
+    int iB = GetBValue(crFrom);
+
+    //
+
+    int idR = (256 * (GetRValue(crTo) - iR)) / iWidth;
+
+    int idG = (256 * (GetGValue(crTo) - iG)) / iWidth;
+
+    int idB = (256 * (GetBValue(crTo) - iB)) / iWidth;
+
+
+
+    iR *= 256;
+
+    iG *= 256;
+
+    iB *= 256;
+
+    // ->
+
+    for (int i = rRect.left; i <= iWidth; i++, iR += idR, iG += idG, iB += idB)
+    {
+        RECT rcx;
+        RectTypeConvert(rcx, i, rRect.top, 1, iHeight);
+        HBRUSH hbr = CreateSolidBrush(RGB(iR / 256, iG / 256, iB / 256));
+        HBRUSH hOld = (HBRUSH)SelectObject(pDC, hbr);
+        FillRect(pDC,&rcx, hbr);
+        DeleteObject(hbr);
+        SelectObject(pDC,hOld);
+    }
+
+}
+
+//Other
+
 
 #endif
