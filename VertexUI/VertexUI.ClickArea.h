@@ -157,7 +157,7 @@ namespace VertexUI
 
        
 
-        void SnedClickEvent(HWND hWnd,WPARAM w,LPARAM l)
+        void SendClickEvent(HWND hWnd,WPARAM w,LPARAM l)
         {
             ClickMsg = 1;
             SendMessage(hWnd, WM_MOUSEMOVE, w, l);
