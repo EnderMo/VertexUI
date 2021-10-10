@@ -34,7 +34,7 @@ void Panel2(HWND hWnd, HDC hdc)
     CreateSimpleButton(hWnd, hdc, rc.right - 170, rc.bottom - 80, 150, 40, L"返回");
 }
 ```
-同时,您需要为每一个按钮做好鼠标事件,一般这会在WM_MOUSEMOVE中实现,当然可以在WM_LBUTTONUP中调用ClickAreaEx,但这已经被弃用.
+同时,您需要为每一个按钮做好鼠标事件,一般这会在WM_MOUSEMOVE中实现,(如果您不需要hover,可以在WM_LBUTTONUP中调用ClickAreaEx,但我不建议这么做.)<br>
 使用SwitchPanel来切换面板.
 ```C++
 RUNFUN Button2()
