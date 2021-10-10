@@ -276,15 +276,19 @@ namespace VertexUI
         }
 
         //
-        void SwitchPanel(DRAWPANEL p, const wchar_t* ID)
-        {
-            PanelID = ID;
-        }
 
         void SetPanelID(const wchar_t* id)
         {
             PrevPanelID = PanelID;
             PanelID = id;
+        }
+        
+        void SwitchPanel(const wchar_t* ID)
+        {
+            SetPanelID(ID);
+            RECT rc;
+            GetClientRect(GhWnd, &rc);
+            InvalidateRect(GhWnd, &rc, 1);
         }
     }
 }
