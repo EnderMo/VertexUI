@@ -35,21 +35,130 @@ void Panel2(HWND hWnd, HDC hdc)
 }
 ```
 同时,您需要为每一个按钮做好鼠标事件,一般这会在WM_MOUSEMOVE中实现,当然可以在WM_LBUTTONUP中调用ClickAreaEx,但这已经被弃用.
+使用SwitchPanel来切换面板.
 ```C++
 RUNFUN Button2()
 {
-    SetPanelID(L"Panel2");
-    RECT rc;
-    GetClientRect(GhWnd, &rc);
-    InvalidateRect(GhWnd, &rc, 1);
+    SwitchPanel(L"Panel2");
     return 0;
 }
 RUNFUN Button1()
 {
-    SetPanelID(L"Panel2");
-    RECT rc;
-    GetClientRect(GhWnd, &rc);
-    InvalidateRect(GhWnd, &rc, 1);
+    SwitchPanel(L"Panel2");
     return 0;
 }
+//鼠标事件
+int hState = 0;
+int AreaEvent(HWND hWnd, LPARAM lParam)
+{
+
+    int val = 0;
+    RECT winrc;
+    GetClientRect(hWnd, &winrc);
+
+    if (PanelID == L"Init" || PanelID == L"Panel1")
+    {
+        RECT rc = {};
+        if ((GetAreaPtInfo(hWnd, rc.left + 40, rc.top + 40, 140, 40, rc, lParam)) == 1)
+        {
+            if (ClickMsg == 1)
+            {
+                ClickMsg = 0;
+                Button1();
+            }
+            if (hState == 0)
+            {
+                HDC hdc = GetDC(hWnd);
+                CreateRect(hWnd, hdc, rc.left, rc.bottom - 5, rc.right - rc.left, 5, VERTEXUICOLOR_GREENDEEPSEA);
+                DeleteObject(hdc);
+                ReleaseDC(hWnd, hdc);
+                DeleteDC(hdc);
+                hState = 1;
+            }
+            return 0;
+        }
+        else
+        {
+            if (hState == 1)
+            {
+                hState = 0;
+                InvalidateRect(hWnd, &winrc, 0);
+            }
+            return 0;
+        }
+    }
+    if (PanelID == L"Panel2")
+    {
+        RECT rc = {};
+        if ((GetAreaPtInfo(hWnd, winrc.right - 170, winrc.bottom - 80, 150, 40, rc, lParam)) == 1)
+        {
+            if (ClickMsg == 1)
+            {
+                ClickMsg = 0;
+                Button2();
+            }
+            if (hState == 0)
+            {
+                HDC hdc = GetDC(hWnd);
+                //CreateRect(hWnd, hdc, x, rc.bottom - 2, rc.right - rc.left, 2, VERTEXUICOLOR_GREENDEEPSEA);
+                CreateRect(hWnd, hdc, rc.left, rc.bottom - 5, rc.right - rc.left, 5, VERTEXUICOLOR_GREENDEEPSEA);
+                DeleteObject(hdc);
+                ReleaseDC(hWnd, hdc);
+                DeleteDC(hdc);
+                hState = 1;
+            }
+            return 0;
+        }
+        else
+        {
+            if (hState == 1)
+            {
+                hState = 0;
+                InvalidateRect(hWnd, &winrc, 0);
+                return 0;
+            }
+        }
+    }
+    if (PanelID != 0)
+    {
+
+    }
+
+    return 0;
+}
+//WndProc中
+    case WM_MOUSEMOVE:
+    {
+        AreaEvent(hWnd, lParam);
+        break;
+    }
+    case WM_ERASEBKGND:
+    {
+        break;
+    }
+    case WM_LBUTTONUP:
+    {
+        SnedClickEvent(hWnd, wParam, lParam); //发送Click,mousemove检测ClickMsg
+        return 0;
+    }
 ```
+现在,总体布置已经ok啦!最后一步,只需要在WM_PAINT中相应每一个Panel的绘制就好啦!
+```C++
+    case WM_PAINT:
+    {
+        PAINTSTRUCT ps;
+        HDC hdc = BeginPaint(hWnd, &ps);
+        // 切换
+        if (PanelID == L"Init")
+        {
+            CreatePanelByFlag(hWnd, hdc, Panel1);
+        }
+        if (PanelID == L"Panel2")
+        {
+            CreatePanelByFlag(hWnd, hdc, Panel2);
+        }
+        EndPaint(hWnd, &ps);
+        break;
+    }
+```
+### 感谢使用VertexUI. ###
