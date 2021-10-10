@@ -133,7 +133,7 @@ int AreaEvent(HWND hWnd, LPARAM lParam)
     }
     case WM_ERASEBKGND:
     {
-        break;
+        break; //不擦除背景以实现动画叠层和减小窗体拖动可能出现的闪烁,请在最大化窗体的时候InvalidateRect或者删除这段代码.
     }
     case WM_LBUTTONUP:
     {
