@@ -10,7 +10,6 @@ VertexUIInit;
 ```
 在开始之前,请先在WM_CREATE中传出hWnd.
 ```C++
-HWND GhWnd;
 case WM_CREATE:
 {
 GhWnd = hWnd;
