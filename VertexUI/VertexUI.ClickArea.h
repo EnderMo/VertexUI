@@ -8,6 +8,8 @@
 #include "framework.h"
 #include "VertexUI.Panel.h"
 #include <stdio.h>
+
+
 typedef int RUNFUN;
 
 namespace VertexUI 
@@ -15,6 +17,7 @@ namespace VertexUI
     namespace Click
     {
         using namespace::VertexUI::Panel;
+        int hState = 0;
         typedef struct VERTEXUIMOUSEEVENT
         {
             UINT hindex = 0;
@@ -22,6 +25,8 @@ namespace VertexUI
         }VUIMOUSEEVENT,*PVUIMOUSEEVENT;
         VUIMOUSEEVENT vev;
         int ClickMsg = 0;
+        int RClickMsg = 0;
+        int RDClickMsg = 0;
         int ClickArea(HWND hWnd, int x, int y, int sizex, int sizey, LPARAM lParam, RUNFUN function())
         {
             POINT pt;
@@ -279,5 +284,114 @@ namespace VertexUI
             SendMessage(hWnd, WM_MOUSEMOVE, w, l);
             ClickMsg = 0;
         }
-    }
+        void SendClickEvent(HWND hWnd, WPARAM w, LPARAM l)
+        {
+            ClickMsg = 1;
+            SendMessage(hWnd, WM_MOUSEMOVE, w, l);
+            ClickMsg = 0;
+        }
+        void SendRClickEvent(HWND hWnd, WPARAM w, LPARAM l)
+        {
+            RClickMsg = 1;
+            SendMessage(hWnd, WM_MOUSEMOVE, w, l);
+            RClickMsg = 0;
+        }
+        void SendRDClickEvent(HWND hWnd, WPARAM w, LPARAM l)
+        {
+            RDClickMsg = 1;
+            SendMessage(hWnd, WM_MOUSEMOVE, w, l);
+            RDClickMsg = 0;
+        }
+
+       
+        }
+
 }
+void ClickAreaBoxHoverAnimation(HWND hWnd, HDC hdc,RECT rc)
+{
+    CreateRect(hWnd, hdc, rc.left, rc.bottom - 5, (rc.right - rc.left) / 20, 5, VERTEXUICOLOR_LAVENDER);
+    Sleep(5);
+    CreateRect(hWnd, hdc, rc.left, rc.bottom - 5, (rc.right - rc.left) / 18, 5, VERTEXUICOLOR_LAVENDER);
+    Sleep(5);
+    CreateRect(hWnd, hdc, rc.left, rc.bottom - 5, (rc.right - rc.left) / 14, 5, VERTEXUICOLOR_LAVENDER);
+    Sleep(5);
+    CreateRect(hWnd, hdc, rc.left, rc.bottom - 5, (rc.right - rc.left) / 10, 5, VERTEXUICOLOR_LAVENDER);
+    Sleep(5);
+    CreateRect(hWnd, hdc, rc.left, rc.bottom - 5, (rc.right - rc.left) / 7, 5, VERTEXUICOLOR_LAVENDER);
+    Sleep(5);
+    CreateRect(hWnd, hdc, rc.left, rc.bottom - 5, (rc.right - rc.left) / 5, 5, VERTEXUICOLOR_LAVENDER);
+    Sleep(5);
+    CreateRect(hWnd, hdc, rc.left, rc.bottom - 5, (rc.right - rc.left) / 3, 5, VERTEXUICOLOR_LAVENDER);
+    Sleep(5);
+    CreateRect(hWnd, hdc, rc.left, rc.bottom - 5, (rc.right - rc.left) / 2, 5, VERTEXUICOLOR_LAVENDER);
+    Sleep(5);
+    CreateRect(hWnd, hdc, rc.left, rc.bottom - 5, (rc.right - rc.left) / 1.8, 5, VERTEXUICOLOR_LAVENDER);
+    Sleep(5);
+    CreateRect(hWnd, hdc, rc.left, rc.bottom - 5, (rc.right - rc.left) / 1.6, 5, VERTEXUICOLOR_LAVENDER);
+    Sleep(5);
+    CreateRect(hWnd, hdc, rc.left, rc.bottom - 5, (rc.right - rc.left) / 1.4, 5, VERTEXUICOLOR_LAVENDER);
+    Sleep(5);
+    CreateRect(hWnd, hdc, rc.left, rc.bottom - 5, (rc.right - rc.left) / 1.2, 5, VERTEXUICOLOR_LAVENDER);
+    Sleep(5);
+    CreateRect(hWnd, hdc, rc.left, rc.bottom - 5, (rc.right - rc.left) / 1.1, 5, VERTEXUICOLOR_LAVENDER);
+    Sleep(5);
+    CreateRect(hWnd, hdc, rc.left, rc.bottom - 5, (rc.right - rc.left), 5, VERTEXUICOLOR_LAVENDER);
+}
+#define AddBoxClickArea(hWnd,lParam,x,y,cx,cy,runfun) if ((GetAreaPtInfo(hWnd, x, y, cx, cy, rc, lParam)) == 1)\
+        {\
+        if (ClickMsg == 1)\
+        {\
+            ClickMsg = 0;\
+            runfun();\
+        }\
+        if (hState == 0)\
+        {\
+            HDC hdc = GetDC(hWnd);\
+            CreateRect(hWnd, hdc, rc.left, rc.bottom - 5, (rc.right - rc.left), 5, VERTEXUICOLOR_LAVENDER);\
+            DeleteObject(hdc);\
+            ReleaseDC(hWnd, hdc);\
+            DeleteDC(hdc);\
+            hState = 1;\
+        }\
+        return 0;\
+        }
+#define AddBoxClickArea_Animation(hWnd,lParam,x,y,cx,cy,runfun) if ((GetAreaPtInfo(hWnd, x, y, cx, cy, rc, lParam)) == 1)\
+        {\
+        if (ClickMsg == 1)\
+        {\
+            ClickMsg = 0;\
+            runfun();\
+        }\
+        if (hState == 0)\
+        {\
+            HDC hdc = GetDC(hWnd);\
+            ClickAreaBoxHoverAnimation(hWnd,hdc,rc);\
+            DeleteObject(hdc);\
+            ReleaseDC(hWnd, hdc);\
+            DeleteDC(hdc);\
+            hState = 1;\
+        }\
+        return 0;\
+        }
+
+//窗口,鼠标传参,x,y,大小,大小,x偏移量,大小偏移量,高度偏移量,颜色,运行
+#define AddBoxClickAreaEx(hWnd,lParam,x,y,cx,cy,x1,wsize,hsize,color,runfun) if ((GetAreaPtInfo(hWnd, x, y, cx, cy, rc, lParam)) == 1)\
+        {\
+        if (ClickMsg == 1)\
+        {\
+            ClickMsg = 0;\
+            runfun();\
+        }\
+        if (hState == 0)\
+        {\
+            HDC hdc = GetDC(hWnd);\
+            CreateRect(hWnd, hdc, rc.left + x1, rc.bottom - hsize, rc.right - rc.left - wsize, hsize,color);\
+            DeleteObject(hdc);\
+            ReleaseDC(hWnd, hdc);\
+            DeleteDC(hdc);\
+            hState = 1;\
+        }\
+        return 0;\
+        }
+
+#define AddCtlEvent(hWnd,lParam,ctl) AddBoxClickArea(hWnd,lParam,ctl.x,ctl.y,ctl.sizex,ctl.sizey,ctl.runfun)
